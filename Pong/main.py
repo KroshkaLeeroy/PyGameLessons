@@ -17,7 +17,6 @@ def ball_animation():
         ball_speed_x *= -1
 
 
-# 1) Аналогично с передвижением мяча, переносим код из цикла в отдельную функцию с названием player_animation()
 def player_animation():
     player.y += player_speed
 
@@ -46,8 +45,9 @@ light_gray = (200, 200, 200)
 
 ball_speed_x = 7
 ball_speed_y = 7
-
 player_speed = 0
+opponent_speed = 7 # 1) создаем скорость движения оппонента
+
 
 while True:
     for event in pygame.event.get():
@@ -70,8 +70,19 @@ while True:
                 player_speed += 7
 
     ball_animation()
-    # 2) Вызываем функцию передвижения игрока
     player_animation()
+
+    # 2) Привязываем следование оппонетна кк мячу
+    if opponent.top < ball.y:
+        opponent_speed += opponent_speed
+    if opponent.bottom > ball.y:
+        opponent_speed -= opponent
+    # 3) Ограничиваем оппонента в рамках экрана
+    if opponent.top <= 0:
+        opponent.top = 0
+
+    if opponent.bottom >= screen_height:
+        opponent.bottom = screen_height
 
     screen.fill(bg_color)
     pygame.draw.aaline(screen, light_gray, (screen_width / 2, 0), (screen_width / 2, screen_height))
