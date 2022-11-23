@@ -1,5 +1,5 @@
 import pygame, sys
-
+import random
 
 def ball_animation():
     global ball_speed_x, ball_speed_y
@@ -11,11 +11,16 @@ def ball_animation():
         ball_speed_y *= -1
 
     if ball.left <= 0 or ball.right >= screen_width:
-        ball_speed_x *= -1
+        ball_restart() # 3) ФУнкция вызываемая при косании мячем стенки
 
     if ball.colliderect(player) or ball.colliderect(opponent):
         ball_speed_x *= -1
 
+def ball_restart():# 4) Фyнкция вызываемая при косании мячем стенки
+    global ball_speed_x, ball_speed_y
+    ball.center = (screen_width/2, screen_height/2)
+    ball_speed_y *= random.choice((1,-1))
+    ball_speed_x *= random.choice((1,-1))
 
 def player_animation():
     player.y += player_speed
@@ -25,6 +30,18 @@ def player_animation():
 
     if player.bottom >= screen_height:
         player.bottom = screen_height
+
+
+def opponent_ai(): # 2) Те же действия по организации кода
+    global opponent_speed
+    if opponent.top < ball.y:
+        opponent.top += opponent_speed
+    if opponent.bottom > ball.y:
+        opponent.bottom -= opponent_speed
+    if opponent.top <= 0:
+        opponent.top = 0
+    if opponent.bottom >= screen_height:
+        opponent.bottom = screen_height
 
 
 pygame.init()
@@ -43,11 +60,10 @@ opponent = pygame.Rect(10, screen_height / 2 - 70, 10, 140)
 bg_color = pygame.Color('gray12')
 light_gray = (200, 200, 200)
 
-ball_speed_x = 7
-ball_speed_y = 7
+ball_speed_x = 7 * random.choice((1,-1))
+ball_speed_y = 7 * random.choice((1,-1))
 player_speed = 0
-opponent_speed = 7 # 1) создаем скорость движения оппонента
-
+opponent_speed = 7
 
 while True:
     for event in pygame.event.get():
@@ -71,18 +87,7 @@ while True:
 
     ball_animation()
     player_animation()
-
-    # 2) Привязываем следование оппонетна кк мячу
-    if opponent.top < ball.y:
-        opponent_speed += opponent_speed
-    if opponent.bottom > ball.y:
-        opponent_speed -= opponent
-    # 3) Ограничиваем оппонента в рамках экрана
-    if opponent.top <= 0:
-        opponent.top = 0
-
-    if opponent.bottom >= screen_height:
-        opponent.bottom = screen_height
+    opponent_ai()  # 1)
 
     screen.fill(bg_color)
     pygame.draw.aaline(screen, light_gray, (screen_width / 2, 0), (screen_width / 2, screen_height))
