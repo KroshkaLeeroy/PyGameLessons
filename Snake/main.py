@@ -1,48 +1,37 @@
 import sys
 import pygame
+from pygame import Vector2
+
+
+# 2 Создание объекта фрукт, и размещение его на координатной сетке карты
+class FRUIT:
+    def __init__(self):
+        self.x = 5
+        self.y = 4
+        # 3 Для более удобного контроля движения объекта используем векторы, так как они упрощают читаемость кода,
+        # и работу с передвижением
+        self.pos = Vector2(self.x, self.y)
+
+    # 4 Создание метода для размещения фрукта по его координатным позиция
+    def draw_fruit(self):
+        fruit_rect = pygame.Rect(self.pos.x, self.pos.y, cell_size, cell_size)
+        # 5 Физическая отрисовка объекта с цветом
+        pygame.draw.rect(screen, (126, 166, 114), fruit_rect)
+
 
 pygame.init()
 
 clock = pygame.time.Clock()
 
-screen_width = 600
-screen_height = 600
+# 1 Пересоздаем размеры окна, чтобы удобнее было составить сетку передвижения змеи
+cell_size = 40
+cell_number = 20
 
-screen = pygame.display.set_mode((screen_width, screen_height))
+screen = pygame.display.set_mode((cell_size * cell_number, cell_size * cell_number))
 pygame.display.set_caption('Snake')
 
-# 1) Rectangles это просто прямоугольник в который можно использовать для рисования чего-либо, или обводки.
-# И этот прямоугольник имеет большое количество точек, от которых мы можем отталкиваться.
-# *---*---*     Предположим это наш прямоугольник
-# |   |   |
-# *---*---*
-# |   |   |
-# *---*---*     А это все точки в координатах от которых мы можем отталкиваться
-#                             top
-#                          _________
-#                            midtop
-#                              |
-#           |    topleft - *---*---* - topright     |
-#           |              |   | / | - center       |
-#     left  |    midleft - *---*---* - midright     |  right
-#           |              |   |   |                |
-#           | bоttomleft - *---*---* - bottomright  |
-#                              |
-#                          midbоttom
-#                          _________
-#                           bоttom
-# Эти точки чрезвычайно полезны не только для перемещения чего-то, но и для описания пересечения с другими объектами.
-# Есть 2 способа создания Rectangles.
-# pygame.Rect(x,y,w,h) Самостоятельное создание прямоугольника
-# surface.get_rect(position) Создание прямоугольника вокруг какого либо объекта.
-# И если у нас есть прямоугольник, мы можем делать с ним большое количество действий.
-
-# test_rect = pygame.Rect(100, 200, 100, 100)
-
-# 4) Создание поверхности
-test_surface = pygame.Surface((100, 200))
-test_rect = test_surface.get_rect(center=(300, 300))  # .get_rect() Создание прямоугольника вокруг поверхности.
-# Выбрав точку прямоугольника указываем координаты на которых она будет размещаться .get_rect(center=(300, 300))
+# 6 Создание самого объекта фрукта
+fruit = FRUIT()
 
 while True:
     for event in pygame.event.get():
@@ -52,18 +41,8 @@ while True:
 
     screen.fill((175, 215, 70))
 
-    # 6) Если нам необходимо передвинуть объект, мы двигаем какую либо сторону (left, right, top, buttom) прямоугольника
-    test_rect.bottom += 1
+    # 7 Использование метода для его размещения на экране
+    fruit.draw_fruit()
 
-    # 2) Физическое рисование прямоугольника
-    # pygame.draw.rect(screen, (0, 0, 0), test_rect)
-
-    # 3) Разница в Surface и Rectangle не только в удобстве перемещения, это еще и физически проще вычислять для компа.
-    # Обычно мы не заполняем поверхность цветом, а располагаем в ней что-то еще.
-    # screen.blit(test_surface, (200, 200))
-
-    # 5) Фактическое размещение поверхности на экране, с указанием координат из прямоугольника
-    screen.blit(test_surface,test_rect)
-
-    pygame.display.update()  # Или .flip()
+    pygame.display.update()
     clock.tick(60)
