@@ -1,21 +1,34 @@
 import sys
 import pygame
 from pygame import Vector2
+import random
 
 
-# 2 Создание объекта фрукт, и размещение его на координатной сетке карты
+# 3 создание класса змеи, для хранения информации о координатах ее тела
+class SNAKE:
+    def __init__(self):
+        # 4 Создание 3х блоков тела змеи в начале игры
+        self.body = [Vector2(5,10), Vector2(6,10), Vector2(7,10)]
+
+    def draw_snake(self):
+        # 5 по очереди отрисовываем блоки тела змеи
+        for block in self.body:
+            # 6 Повторяемся так же как и с отрисовкой фрукта
+            block_rect = pygame.Rect(block.x * cell_size, block.y * cell_size, cell_size, cell_size)
+            pygame.draw.rect(screen, (183,111,122), block_rect)
+
+
 class FRUIT:
     def __init__(self):
-        self.x = 5
-        self.y = 4
-        # 3 Для более удобного контроля движения объекта используем векторы, так как они упрощают читаемость кода,
-        # и работу с передвижением
+        # 2 Используя рандом размещаем Х в случайной ячейке карты, -1 потому что 20 ячейка находится за экраном
+        self.x = random.randint(0,cell_number - 1)
+        self.y = random.randint(0,cell_number - 1)
+
         self.pos = Vector2(self.x, self.y)
 
-    # 4 Создание метода для размещения фрукта по его координатным позиция
+    # 1 Поправляем размещение фрукта, с созданием иллюзии сетки по которой все ставится и двигается
     def draw_fruit(self):
-        fruit_rect = pygame.Rect(self.pos.x, self.pos.y, cell_size, cell_size)
-        # 5 Физическая отрисовка объекта с цветом
+        fruit_rect = pygame.Rect(self.pos.x * cell_size, self.pos.y * cell_size, cell_size, cell_size)
         pygame.draw.rect(screen, (126, 166, 114), fruit_rect)
 
 
@@ -23,15 +36,17 @@ pygame.init()
 
 clock = pygame.time.Clock()
 
-# 1 Пересоздаем размеры окна, чтобы удобнее было составить сетку передвижения змеи
+
 cell_size = 40
 cell_number = 20
 
 screen = pygame.display.set_mode((cell_size * cell_number, cell_size * cell_number))
 pygame.display.set_caption('Snake')
 
-# 6 Создание самого объекта фрукта
+
 fruit = FRUIT()
+# 6 Создание объекта для класса змеи
+snake = SNAKE()
 
 while True:
     for event in pygame.event.get():
@@ -41,8 +56,10 @@ while True:
 
     screen.fill((175, 215, 70))
 
-    # 7 Использование метода для его размещения на экране
+
     fruit.draw_fruit()
+    # 7 Физическая отрисовка змеи
+    snake.draw_snake()
 
     pygame.display.update()
     clock.tick(60)
