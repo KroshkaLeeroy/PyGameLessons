@@ -8,3 +8,6 @@ class Tile(pygame.sprite.Sprite):
         self.image.fill('gray')
         self.rect = self.image.get_rect(topleft=pos)
 
+    # Создание метода передвижения клетки в право
+    def update(self, x_shift):
+        self.rect.x += x_shift
