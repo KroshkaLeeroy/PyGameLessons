@@ -6,9 +6,9 @@ import random
 
 class SNAKE:
     def __init__(self):
-        self.body = [Vector2(5, 10), Vector2(6, 10), Vector2(7, 10)]
+        # 5
+        self.body = [Vector2(5, 10), Vector2(4, 10), Vector2(3, 10)]
         self.direction = Vector2(1, 0)
-        # 14 переменной которая это отслеживает
         self.new_block = False
 
     def draw_snake(self):
@@ -17,7 +17,6 @@ class SNAKE:
             pygame.draw.rect(screen, (183, 111, 122), block_rect)
 
     def move_snake(self):
-        # 15 и самой логики добавления блока
         if self.new_block:
             body_copy = self.body[:]
             body_copy.insert(0, body_copy[0] + self.direction)
@@ -28,7 +27,6 @@ class SNAKE:
             body_copy.insert(0, body_copy[0] + self.direction)
             self.body = body_copy[:]
 
-    # 13 создание метода отвечающего за добавление
     def add_block(self):
         self.new_block = True
 
@@ -36,14 +34,15 @@ class SNAKE:
 
 class FRUIT:
     def __init__(self):
-        # 11 и вызов его соответственно
         self.randomize()
 
     def draw_fruit(self):
         fruit_rect = pygame.Rect(self.pos.x * cell_size, self.pos.y * cell_size, cell_size, cell_size)
-        pygame.draw.rect(screen, (126, 166, 114), fruit_rect)
+        # 7 Отрисовка картинки
+        screen.blit(apple,fruit_rect)
 
-    # 10 создание метода размещения фрукта
+        # pygame.draw.rect(screen, (126, 166, 114), fruit_rect)
+
     def randomize(self):
         self.x = random.randint(0, cell_number - 1)
         self.y = random.randint(0, cell_number - 1)
@@ -51,35 +50,46 @@ class FRUIT:
         self.pos = Vector2(self.x, self.y)
 
 
-# 1 Создаем класс игры который будет в себе сдержать змею и фрукт
 class MAIN:
     def __init__(self):
         self.snake = SNAKE()
         self.fruit = FRUIT()
 
-    # 2 метод обновления движения змеи
     def update(self):
         self.snake.move_snake()
-        # 8 Вызов проверки
         self.check_collision()
+        # 3 Вызов проверки
+        self.check_fail()
 
-    # 3 метод отрисовки всех элементов
     def draw_elements(self):
         self.fruit.draw_fruit()
         self.snake.draw_snake()
 
-    # 7 создание метода проверки пересечения позиций фрукта и позиций головы змеи
     def check_collision(self):
         if self.fruit.pos == self.snake.body[0]:
-            # 9 В момент когда змея съедает фрукт, фрукт должен переместиться
             self.fruit.randomize()
-            # 12 добавление змейке блок
             self.snake.add_block()
 
+    def check_fail(self):
+        # 1 Проверка пересечения границ экрана
+        if not 0 <= self.snake.body[0].x < cell_number or not 0 <= self.snake.body[0].y < cell_number:
+            self.game_over()
+
+        # 4 проверка пересечения собственного тела
+        for block in self.snake.body[1:]:
+            if block == self.snake.body[0]:
+                self.game_over()
+
+    # 2 Остановка игры
+    def game_over(self):
+        pygame.quit()
+        sys.exit()
 
 pygame.init()
 
 clock = pygame.time.Clock()
+# 7 добавление объекта картинки
+apple = pygame.image.load('graphics/apple.png')
 
 cell_size = 40
 cell_number = 20
@@ -90,7 +100,6 @@ pygame.display.set_caption('Snake')
 SCREEN_UPDATE = pygame.USEREVENT
 pygame.time.set_timer(SCREEN_UPDATE, 150)
 
-# 4 Создание экземпляра класса
 main_game = MAIN()
 
 while True:
@@ -99,20 +108,23 @@ while True:
             pygame.quit()
             sys.exit()
         if event.type == SCREEN_UPDATE:
-            # 5 обновление и передвижения
             main_game.update()
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_UP:
-                main_game.snake.direction = Vector2(0, -1)
+                # 6 Запрет змейке двигаться в противоположном направлении
+                if main_game.snake.direction.y != 1:
+                    main_game.snake.direction = Vector2(0, -1)
             if event.key == pygame.K_DOWN:
-                main_game.snake.direction = Vector2(0, 1)
+                if main_game.snake.direction.y != -1:
+                    main_game.snake.direction = Vector2(0, 1)
             if event.key == pygame.K_LEFT:
-                main_game.snake.direction = Vector2(-1, 0)
+                if main_game.snake.direction.x != 1:
+                    main_game.snake.direction = Vector2(-1, 0)
             if event.key == pygame.K_RIGHT:
-                main_game.snake.direction = Vector2(1, 0)
+                if main_game.snake.direction.x != -1:
+                    main_game.snake.direction = Vector2(1, 0)
 
     screen.fill((175, 215, 70))
-    # 6 отрисовка
     main_game.draw_elements()
 
     pygame.display.update()
