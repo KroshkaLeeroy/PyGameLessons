@@ -10,7 +10,6 @@ class SNAKE:
         self.direction = Vector2(1, 0)
         self.new_block = False
 
-        # 1 Загрузка всех возможных спрайтов змейки
         self.head_up = pygame.image.load('Graphics/head_up.png').convert_alpha()
         self.head_down = pygame.image.load('Graphics/head_down.png').convert_alpha()
         self.head_right = pygame.image.load('Graphics/head_right.png').convert_alpha()
@@ -30,40 +29,57 @@ class SNAKE:
         self.body_bl = pygame.image.load('Graphics/body_bl.png').convert_alpha()
 
     def draw_snake(self):
-        # 7 Позиционирование головы
         self.update_head_graphics()
+        # 2 Делаем точно также как и с головой
+        self.update_tail_graphics()
 
-        # 4 Все еще нам необходим прямоугольник, чтобы правильно позиционировать спрайт блока
         for index, block in enumerate(self.body):
             x_pos = int(block.x * cell_size)
             y_pos = int(block.y * cell_size)
             block_rect = pygame.Rect(x_pos, y_pos, cell_size, cell_size)
 
-            # 5 Если голова первый блок, то рисуем голову змеи.
             if index == 0:
                 screen.blit(self.head, block_rect)
-
-                # screen.blit(self.head_right, block_rect)
-                # 6 В противном случае пока рисуем блок. Однако при запуске можем увидеть, что голова всегда смотрит
-                # в одну сторону, что немного странно, для ее позиционирования создадим отдельный метод
+            # 1 Теперь нам необходимо ловить местоположение хоста змеи
+            elif index == len(self.body) - 1 :
+                screen.blit(self.tail, block_rect)
             else:
-                pygame.draw.rect(screen, (150, 100, 100), block_rect)
-
-        # 3 Чтобы размещать спрайты змеи, нам необходимо понимать в каком положении находится блок перед нами
-        # и после нас.
-
-        # 2 эта часть больше не нужна
-        # for block in self.body:
-        #     block_rect = pygame.Rect(block.x * cell_size, block.y * cell_size, cell_size, cell_size)
-        #     pygame.draw.rect(screen, (183, 111, 122), block_rect)
+                # 6 Для вертикальных и горизонтальных блоков нам необходимо понимать направление змеи,
+                # его можно узнать из положения впереди стоящего и заднего блоков
+                previous_block = self.body[index + 1] - block
+                next_block = self.body[index - 1] - block
+                # 7 Если первый блок расположен левее или правее заднего блока то рисуем вертикальный
+                if previous_block.x == next_block.x:
+                    screen.blit(self.body_vertical, block_rect)
+                # 8 Если первый блок расположен выше или ниже заднего блока рисуем горизонтальный блок
+                if previous_block.y == next_block.y:
+                    screen.blit(self.body_horizontal, block_rect)
+                else:
+                    # 9 Если вектор движения по Х первого блока отрицательный
+                    # и вектор заднего блока по У тоже отрицательный
+                    # или вектор движения первого блока по У, отрицательный
+                    # и вектор движения по Х заднего блока тоже отрицательный
+                    if previous_block.x == -1 and next_block.y == -1 or previous_block.y == -1 and next_block.x == -1:
+                        # 10 Рисуем угловой блок
+                        screen.blit(self.body_tl,  block_rect)
 
     def update_head_graphics(self):
-        # 8 Проверяем векторы с направлением движения головы
         head_relation = self.body[1] - self.body[0]
         if head_relation == Vector2(1, 0): self.head = self.head_left
         elif head_relation == Vector2(-1, 0): self.head = self.head_right
         elif head_relation == Vector2(0, 1): self.head = self.head_up
         elif head_relation == Vector2(0, -1): self.head = self.head_down
+
+    # 3 создаем метод отвечающий за поиск направление хвоста
+    def update_tail_graphics(self):
+        # 4 На этот раз берем предпоследний и последний блоки
+        tail_relation = self.body[-2] - self.body[-1]
+        # 5 Проделываем тоже самое, что и с головой змеи
+        if tail_relation == Vector2(1, 0): self.tail = self.tail_left
+        elif tail_relation == Vector2(-1, 0): self.tail = self.tail_right
+        elif tail_relation == Vector2(0, 1): self.tail = self.tail_up
+        elif tail_relation == Vector2(0, -1): self.tail = self.tail_down
+
 
     def move_snake(self):
         if self.new_block:
