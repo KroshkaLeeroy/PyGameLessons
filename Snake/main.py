@@ -30,7 +30,6 @@ class SNAKE:
 
     def draw_snake(self):
         self.update_head_graphics()
-        # 2 Делаем точно также как и с головой
         self.update_tail_graphics()
 
         for index, block in enumerate(self.body):
@@ -40,28 +39,25 @@ class SNAKE:
 
             if index == 0:
                 screen.blit(self.head, block_rect)
-            # 1 Теперь нам необходимо ловить местоположение хоста змеи
             elif index == len(self.body) - 1 :
                 screen.blit(self.tail, block_rect)
             else:
-                # 6 Для вертикальных и горизонтальных блоков нам необходимо понимать направление змеи,
-                # его можно узнать из положения впереди стоящего и заднего блоков
                 previous_block = self.body[index + 1] - block
                 next_block = self.body[index - 1] - block
-                # 7 Если первый блок расположен левее или правее заднего блока то рисуем вертикальный
                 if previous_block.x == next_block.x:
                     screen.blit(self.body_vertical, block_rect)
-                # 8 Если первый блок расположен выше или ниже заднего блока рисуем горизонтальный блок
                 if previous_block.y == next_block.y:
                     screen.blit(self.body_horizontal, block_rect)
                 else:
-                    # 9 Если вектор движения по Х первого блока отрицательный
-                    # и вектор заднего блока по У тоже отрицательный
-                    # или вектор движения первого блока по У, отрицательный
-                    # и вектор движения по Х заднего блока тоже отрицательный
+                    # 1) Проделываем то же самое с оставшейся частью направлений
                     if previous_block.x == -1 and next_block.y == -1 or previous_block.y == -1 and next_block.x == -1:
-                        # 10 Рисуем угловой блок
                         screen.blit(self.body_tl,  block_rect)
+                    elif previous_block.x == -1 and next_block.y == 1 or previous_block.y == 1 and next_block.x == -1:
+                        screen.blit(self.body_bl,  block_rect)
+                    elif previous_block.x == 1 and next_block.y == -1 or previous_block.y == -1 and next_block.x == 1:
+                        screen.blit(self.body_tr,  block_rect)
+                    elif previous_block.x == 1 and next_block.y == 1 or previous_block.y == 1 and next_block.x == 1:
+                        screen.blit(self.body_br,  block_rect)
 
     def update_head_graphics(self):
         head_relation = self.body[1] - self.body[0]
@@ -70,16 +66,12 @@ class SNAKE:
         elif head_relation == Vector2(0, 1): self.head = self.head_up
         elif head_relation == Vector2(0, -1): self.head = self.head_down
 
-    # 3 создаем метод отвечающий за поиск направление хвоста
     def update_tail_graphics(self):
-        # 4 На этот раз берем предпоследний и последний блоки
         tail_relation = self.body[-2] - self.body[-1]
-        # 5 Проделываем тоже самое, что и с головой змеи
         if tail_relation == Vector2(1, 0): self.tail = self.tail_left
         elif tail_relation == Vector2(-1, 0): self.tail = self.tail_right
         elif tail_relation == Vector2(0, 1): self.tail = self.tail_up
         elif tail_relation == Vector2(0, -1): self.tail = self.tail_down
-
 
     def move_snake(self):
         if self.new_block:
@@ -122,6 +114,9 @@ class MAIN:
         self.check_fail()
 
     def draw_elements(self):
+        # 15) Отрисовка элементов
+        self.draw_grass()
+        self.draw_score()
         self.fruit.draw_fruit()
         self.snake.draw_snake()
 
@@ -142,11 +137,46 @@ class MAIN:
         pygame.quit()
         sys.exit()
 
+    # 2) Создаем метод отрисовки фона
+    def draw_grass(self):
+
+        grass_color = (167, 209, 61)
+        # 3) Итерируемся по клеткам
+        for row in range(cell_number):
+            # 4) Если линия четная
+            if row % 2 == 0:
+                # 5) Итерируемся по блокам
+                for col in range(cell_number):
+                    # 6) Если клетка четная
+                    if col % 2 == 0:
+                        # 7) Создаем прямоугольник и закрашиваем его
+                        block_rect = pygame.Rect(col * cell_size, row * cell_size, cell_size, cell_size)
+                        pygame.draw.rect(screen, grass_color, block_rect)
+            # 8) Если линия не четная
+            else:
+                for col in range(cell_number):
+                    if col % 2 != 0:
+                        block_rect = pygame.Rect(col * cell_size, row * cell_size, cell_size, cell_size)
+                        pygame.draw.rect(screen, grass_color, block_rect)
+
+    # 10) Создаем метод отрисовки подсчета очков
+    def draw_score(self):
+        # 11) Создаем текст подсчета очков
+        score_text = game_font.render("Score: " + str(len(self.snake.body) - 3), True, (255, 255, 255))
+        # 12) Создаем прямоугольник для подсчета очков
+        score_rect = score_text.get_rect()
+        # 13) Размещаем прямоугольник справа сверху
+        score_rect.topleft = (cell_size * cell_number - 120, 10)
+        # 14) Рисуем прямоугольник
+        screen.blit(score_text, score_rect)
+
 
 pygame.init()
 
 clock = pygame.time.Clock()
 apple = pygame.image.load('Graphics/apple.png')
+# 9) создаем шрифт выбрать и скачать можно с Dafont.com
+game_font = pygame.font.Font('Font/PoetsenOne-Regular.ttf', 25)
 
 cell_size = 40
 cell_number = 20
